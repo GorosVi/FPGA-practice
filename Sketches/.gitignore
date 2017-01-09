@@ -65,6 +65,5 @@ timing/
 testbench/
 *_sim/
 
-*.ddb
 # ignore git-running shell script
 shell.cmd

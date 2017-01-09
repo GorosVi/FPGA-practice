@@ -1,0 +1,449 @@
+% © GV'16 - XeTeX stylesheet v1.7 “”
+
+\def \GAuthor    {Author}
+\def \GReviewer  {Reviewer}
+\def \GExecuted  {Выполнил:}
+\def \BoldMarkers{\bfseries}
+\def \HyperLinks {true}
+\def \TOCdepth   {3}
+\def \Year       {2016}
+
+\def \LineA      {\vspace{-\baselineskip}}
+\def \LineB      {\vspace{-\baselineskip}}
+\def \LineC      {\vspace{-\baselineskip}}
+\def \LineD      {\vspace{-\baselineskip}}
+\def \LineE      {\vspace{-\baselineskip}}
+\def \LineF      {\vspace{-\baselineskip}}
+\def \LineG      {\vspace{-\baselineskip}}
+\def \LineH      {\vspace{-\baselineskip}}
+\def \LineI      {\vspace{-\baselineskip}}
+\def \LineJ      {\vspace{-\baselineskip}}
+\def \LineK      {}
+\def \LineL      {}
+
+
+\def \bd #1 	{\textbf{#1 }}
+\def \le        {\leqslant}
+\def \ge        {\geqslant}
+\def \phi       {\varphi}
+\def \eset      {\varnothing}
+\def \kappa     {\varkappa}
+\def \epsilon   {\varepsilon}
+\def \decpar    {\looseness=-1}
+\def \sstrut    {\rule{0pt}{10mm}}
+\def \sdots     {\,\ldots\,}
+\def \term   #1 {\textbf{#1 }}
+\def \comm   #1 {\pagebreak[2]\bigskip\textbf{#1 }}
+\def \sample #1 {\pagebreak[2]\bigskip\textbf{#1 }}
+\def \stitle #1 {\pagebreak[3]\bigskip\textbf{#1 }}
+
+
+% No caption: only {filename}, {width} and [position]
+\newcommand{\imgn}[3][h]{\begin{figure}[#1]\centering\includegraphics[width=#3\linewidth]{#2}\end{figure}}
+
+% Image with {filename}, {width}, {caption}, {label} and [position]
+\newcommand{\img}[5][h]{\begin{figure}[#1]\centering\includegraphics[width=#3\linewidth]{#2}\caption{#4}\label{#5}%
+                         \end{figure}}
+
+% Two images without caption: only {filename1}, {filename2}, {width} and [position]
+\newcommand{\iimgn}[4][h]{\begin{figure}[#1]%
+                            \begin{minipage}[h]{0.49\linewidth}%
+                                \centering\includegraphics[width=\linewidth]{#2}%
+                            \end{minipage}\hfill%
+                            \begin{minipage}[h]{0.49\linewidth}%
+                                \centering\includegraphics[width=\linewidth]{#3}%
+                            \end{minipage}%
+                        \end{figure}}
+
+% Two images with {filename1}, {filename2}, {width}, {caption}, {label} and [position]
+\newcommand{\iimg}[6][h]{\begin{figure}[#1]%
+                            \begin{minipage}[h]{0.49\linewidth}%
+                                \centering\includegraphics[width=\linewidth]{#2}\\\small1)%
+                            \end{minipage}\hfill%
+                            \begin{minipage}[h]{0.49\linewidth}%
+                                \centering\includegraphics[width=\linewidth]{#3}\\\small2)%
+                            \end{minipage}%
+                            \vspace{-0.3cm}
+                            \caption{#5}\label{#6}%
+                        \end{figure}}
+
+
+% May be redefined in document as empty when not needed
+\def \nocredits {
+	\hspace{-1.125cm}
+		\vbox{\begin{tabbing}
+			Выполнилм \=\hspace{12.10cm}\=\hspace{1.5cm}\kill
+			\GExecuted\>\begin{minipage}[t]{12.49cm}\strut\GAuthor\strut\end{minipage}\>\rule{1.5cm}{0.0pt}\\
+			\hbox to 1.94cm{{П\hfil}р{\hfil}о{\hfil}в{\hfil}е{\hfil}р{\hfil}и{\hfil}л:}\>\strut\GReviewer\>\rule{1.5cm}{0.0pt}\\
+		\end{tabbing}
+	\vspace{-1.25cm}}
+	}
+
+
+% Common settings
+\setcounter{secnumdepth}{0} % Глубина нумерации разделов?
+\parskip   = \bigskipamount
+\parindent = -0cm
+
+% Margins - a4paper 210x297
+\hoffset = -1in
+\voffset = -1in
+\topmargin = 1.5cm
+\headheight = 0pt
+\headsep = 0pt
+\textheight = 26.5cm
+\footskip = 0.75cm
+\textwidth = 16cm
+\oddsidemargin = 3.5cm
+\evensidemargin = 2.5cm
+
+\reversemarginpar
+\marginparwidth = 2cm
+
+\usepackage{amsmath,amssymb}
+\usepackage{indentfirst}
+\usepackage{xltxtra}
+\usepackage{float}
+\setmainfont{Calibri}
+\setsansfont{Calibri}
+\setmonofont{Consolas}
+\usepackage{polyglossia}
+\setotherlanguage{english}
+\setdefaultlanguage[spelling=modern]{russian}
+\def \footnoterule {}
+\makeatletter
+\def \@makefnmark{\hbox{\@textsuperscript{\normalfont(\@thefnmark)}}}
+\def \@makefntext#1{\noindent\hangindent=3em\hbox to 2em{\hss\@makefnmark}\,#1}
+\makeatother
+
+
+\usepackage{titlesec}
+
+\titleformat{\paragraph}[block]{\large}{}{1ex}{}
+\titleformat{\subparagraph}[block]{\large}{}{1ex}{}
+\titleformat{\section}[block]{\bfseries\huge}{\arabic{section}.}{1ex}{}
+\titleformat{\subsection}[block]{\bfseries\Large}{\arabic{section}.\arabic{subsection}.}{1ex}{}
+\titleformat{\subsubsection}[block]{\large}{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}.}{1ex}{}
+
+\titlespacing*{\section}{-1cm}{3.25ex plus 1ex minus .2ex}{0.0ex plus .2ex}
+\titlespacing*{\subsection}{-1cm}{3.25ex plus 1ex minus .2ex}{0.0ex plus .2ex}
+\titlespacing*{\subsubsection}{-1cm}{3.0ex plus 1ex minus .2ex}{0.0ex plus .2ex}
+\titlespacing*{\paragraph}{-1cm}{3.0ex plus 1ex minus .2ex}{0.0ex plus .2ex}
+\titlespacing*{\subparagraph}{-1cm}{3.0ex plus 1ex minus .2ex}{0.0ex plus .2ex}
+
+%\usepackage{subfigure}
+%\usepackage[subfigure]{tocloft}
+\usepackage{tocloft}
+
+\def \PPN        {\cftpagenumbersoff{paragraph}   \SPPN}
+\def \SPPN       {\cftpagenumbersoff{subparagraph}\SSPN}
+\def \SSPN       {\cftpagenumbersoff{subsubsection}}
+
+
+\def \maketoc {
+	\PPN
+	\def \cftparskip{0cm}
+	\def \cftsecindent{0cm}
+	\def \cftparaindent{2cm}
+	\def \cftsubsecindent{0cm}
+	\def \cftsubparaindent{2cm}
+	\def \cftbeforesecskip{0.5cm}
+	\def \cftsubsubsecindent{1cm}
+	\def \cftbeforeparaskip{0.10cm}
+	\def \cftbeforesubsecskip{0.5cm}
+	\def \cftaftertoctitleskip{0cm}
+	\def \cftbeforetoctitleskip{0cm}
+	\def \cftbeforesubparaskip{0.10cm}
+	\def \cftbeforesubsubsecskip{0.25cm}
+	\def \cftsecfont{\bfseries\Large}
+	\setcounter{tocdepth}{\TOCdepth}
+	\def \cftsecpagefont{\bfseries}
+	\def \cftsubsecfont{\large}
+	\def \cftdotsep{\cftnodots}
+	\def \contentsname{\relax}
+	\tableofcontents
+	\vfill
+	\pagebreak
+}
+
+
+\usepackage[xetex,unicode]{hyperref}
+
+\hypersetup{
+	final          = \HyperLinks,
+	colorlinks     = true,
+	allcolors      = black,
+	pdfauthor      = {gorosvi},
+	pdfcreator     = {XeTeX},
+	pdfstartview   = {FitH}
+	%pdfborderstyle = {/S/U/W 0.5}, %automatic underline was dead, no support in viewers
+	%allbordercolors= {0 0 0},
+	bookmarksopenlevel= 2,
+	bookmarksopen
+}
+
+
+\usepackage[dvipsnames,xetex,table]{xcolor}
+\usepackage{listings}
+
+\def \lstlistingname {Листинг}
+
+\lstset{
+	frame          = RltB,
+	numbers        = left,
+	language       = Python,
+	keepspaces     = true,
+	breaklines     = true,
+	xleftmargin    = 1cm,
+	xrightmargin   = 3mm,
+	captionpos     = b,
+	tabsize        = 4,
+	showstringspaces=false,
+	framexleftmargin=5pt,
+	escapeinside   = {\%*}{*)},
+	rulecolor      = \color{Gray},
+	rulesepcolor   = \color{Gray},
+	identifierstyle= \color{Black},
+	stringstyle    = \color{Fuchsia},
+	commentstyle   = \color{CadetBlue},
+	keywordstyle   = \bfseries\color{Blue},
+	numberstyle    = \scriptsize\color{Gray},
+	basicstyle     = \footnotesize\ttfamily\color{RoyalPurple},
+}
+
+%\usepackage[labelfont={large},textfont={large}]{caption}
+\usepackage[tableposition=top]{caption}
+\DeclareCaptionLabelFormat{GOSTfigure}{Рисунок #2}
+\DeclareCaptionLabelFormat{GOSTtable}{Таблица #2}
+\captionsetup[figure]{labelformat=GOSTfigure}
+\captionsetup[table]{labelformat=GOSTtable}
+
+
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabu}
+
+\definecolor{ztcolor}{named}{CadetBlue}
+\newcolumntype{C}{>{\bf}c}
+\newcolumntype{L}{>{\bf}l}
+\newcolumntype{R}{>{\bf}r}
+\newcolumntype{x}{>{\bf}X}
+
+
+\newenvironment{cztable}[4][h]
+	{\begin{table}[#1]
+	 \ifx&#4&
+	 	% Echo label if defined
+	 \else
+	 	\label{#4}
+	 \fi
+	 \ifx&#3&
+	 	% Echo caption if defined
+	 \else
+	 	\caption{#3}
+	 	\vspace{-0.8cm}
+	 \fi
+	 \center
+	 \begin{ztable}{#2}
+	}
+	{
+	 \end{ztable}
+	 \end{table}
+	}
+
+\newenvironment{cttable}[4][h]
+	{\begin{table}[#1]
+	 \ifx&#4&
+	 	% Echo label if defined
+	 \else
+	 	\label{#4}
+	 \fi
+	 \ifx&#3&
+	 	% Echo caption if defined
+	 \else
+	 	\caption{#3}
+	 	\vspace{-0.8cm}
+	 \fi
+	 \center
+	 \begin{ttable}{#2}
+	}
+	{
+	 \end{ttable}
+	 \end{table}
+	}
+
+\newenvironment{ztable}[2][t]
+	{\taburowcolors[2]{white..ztcolor!5!white}
+		\everyrow{\ifnum0=\value{taburow}\rowcolor{ztcolor!10!white}\fi}
+		\begin{tabu}[#1]{#2}
+		\firsthline
+		\rowfont{\rule{0cm}{0.4cm}\bfseries}
+	}
+	{\lasthline\end{tabu}
+	}
+
+\newenvironment{lztable}[3][]
+	{\taburowcolors[2]{white..ztcolor!5!white}
+	 \begin{longtabu}{|[1.25pt]#2|[1.25pt]}
+		\ifx&#3&
+			% Echo caption if defined
+		\else
+			\caption{#3}\\
+		\fi
+		\firsthline \hline \hline
+		\rowfont{\rule{0cm}{0.4cm}\bfseries}
+		\ifx&#1&
+			% #1 is empty
+		\else
+			\rowcolor{ztcolor!15!white}
+			#1\\\hline
+		\endfirsthead
+	 		\ifx&#3&
+				% Echo caption if defined
+			\else
+				\hiderowcolors\caption[]{ #3 (Продолжение)}\\
+			\fi
+	 		\hline \hline \hline
+			% Дублируем шапку таблицы, если она есть
+	 		\rowfont{\rule{0cm}{0.4cm}\bfseries}
+	 		\rowcolor{ztcolor!15!white}
+			#1\\\hline
+		\endhead
+			\hline \hline \hline
+		\endfoot
+		\endlastfoot
+		\fi
+		\ifx&#1&
+			% #1 is empty
+			\rowcolor{ztcolor!15!white}
+		\fi
+	}
+	{\hline \hline \lasthline
+	 \end{longtabu}
+	}
+
+\newenvironment{ttable}[2][t]
+	{\begin{tabu}[#1]{#2}
+		\firsthline
+		\rowfont{\rule{0cm}{0.4cm}\bfseries}
+	}
+	{	\lasthline
+	 \end{tabu}
+	}
+
+\newenvironment{lttable}[3][]
+	{\begin{longtabu}{#2}
+		\ifx&#3&
+			% Echo caption if defined
+		\else
+			\caption{#3}\\
+		\fi
+		\firsthline \hline \hline
+		\rowfont{\rule{0cm}{0.4cm}\bfseries}
+		\ifx&#1&
+			% #1 is empty
+		\else
+			#1\\\hline
+		\endfirsthead
+	 		\ifx&#3&
+				% Echo caption if defined
+			\else
+				\caption[]{ #3 (Продолжение)}\\
+			\fi
+	 		\hline \hline \hline
+			% Дублируем шапку таблицы, если она есть
+			\rowfont{\rule{0cm}{0.4cm}\bfseries}
+			#1\\\hline
+		\endhead
+			\hline
+		\endfoot
+		\endlastfoot
+		\fi
+	}
+	{\lasthline
+	 \end{longtabu}
+	}
+
+
+\usepackage{enumitem}
+
+\def \labelitemi {\quad\normalfont\BoldMarkers{$\bullet$}}
+\def \labelitemii {\normalfont\BoldMarkers {$\circ$}}
+\def \labelitemiii {\normalfont\BoldMarkers{$\star$}}
+
+\def \theenumi {\normalfont\BoldMarkers{\arabic{enumi}}}
+\def \theenumii {\normalfont\BoldMarkers{.\arabic{enumii}}}
+\def \labelenumi {\quad\normalfont\BoldMarkers{\arabic{enumi}.}}
+\def \theenumiii {\normalfont\BoldMarkers{.\arabic{enumiii}}}
+\def \labelenumii {\normalfont\BoldMarkers{\labelenumi\arabic{enumii}.}}
+\def \labelenumiii {\normalfont\BoldMarkers{\labelenumii\arabic{enumiii}.}}
+
+\setlist[itemize,enumerate]{leftmargin=*,labelsep = 0.3cm,itemsep=-0.2cm,topsep=0cm}
+
+
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+\fancyhf{}
+\def \headrule{}
+\fancyfoot[RO]{\raisebox{1pt}{\rm\thepage}}
+\fancyfoot[LE]{\hspace{-1cm}\raisebox{1pt}{\thepage}}
+\def \footrule{\vbox to 0pt{ \hbox to \headwidth{\hspace{-1.15cm}{\leaders\hrule height 1pt \hfill}\hspace{-0.125cm}} \vss}}
+\fancypagestyle{title}{\fancyhf{}   \def \headrule{} \fancyfoot[R]{\raisebox{1pt}{Санкт-Петербург, \Year}}
+                                                     \fancyfoot[L]{\hspace{-1.03cm}\small\fontspec{Times New Roman}\raisebox{2pt}{\XeTeX}}}
+\fancypagestyle{plain}{}
+
+\renewcommand{\maketitle}{
+	\begin{titlepage}
+	\thispagestyle{title}
+
+	\begin{center}
+		{\small\hspace{-1cm} Министерство образования и науки Российской Федерации \\
+		\hspace{-1cm} Федеральное государственное автономное образовательное учреждение\\[-2pt]
+		\hspace{-1cm} высшего образования}\\[10pt]
+		\hspace{-1cm} \textbf{Санкт-Петербургский национальный исследовательский университет}\\[-5pt]
+		\hspace{-1cm} \rule{11.5cm}{1pt}\\
+		\hspace{-1cm} \textbf{информационных \, технологий, \, механики \,и \,оптики}\\[10pt]
+		\hspace{-1cm} {\small Факультет Информационной безопасности\\[-2pt]
+		\hspace{-1cm} и компьютерных технологий\\[-2pt]
+		\hspace{-1cm} Кафедра ПБКС}
+		\vfill
+		\hspace{-1cm} \Large \LineA \\
+		\hspace{-1cm} \LARGE \textbf{\LineB}\\
+		\hspace{-1cm} \Large \LineC\\
+		\hspace{-1cm} \LARGE \textbf{\LineD}\\
+		\hspace{-1cm} \Large \LineE \\
+		\hspace{-1cm} \LARGE \textbf{\LineF}\\
+		\hspace{-1cm} \Large \LineG\\
+		\hspace{-1cm} \LARGE \textbf{\LineH}\\
+		\hspace{-1cm} \Large \LineI\\
+		\hspace{-1cm} \LARGE \textbf{\LineJ}\\
+		\hspace{-1cm} \Large \LineK\\
+		\hspace{-1cm} \LARGE \textbf{\LineL}\\
+		\vfill
+	\end{center}
+
+	\nocredits
+
+	\pagebreak
+	\end{titlepage}
+	\setcounter{page}{2}
+}
+
+
+\usepackage{pgfplots}
+
+\pgfplotsset{grid = major}
+\pgfplotsset{width=0.7\linewidth,compat=1.10}
+\def\lrot #1 {\pgfplotsset{cycle list shift=#1}}
+\def \pgfsetw #1 {\pgfplotsset{width=#1\linewidth}}
+\tikzstyle{every pin}=[fill=white,draw=black,font=\footnotesize]
+\pgfplotsset{every axis/.append style={cycle list name=gps,}}
+\pgfplotscreateplotcyclelist{gps}{ %
+	blue,    every mark/.append style={fill=.!80!black},   mark=*\\%
+	red,     every mark/.append style={fill=.!80!black},   mark=square*\\%
+	magenta, every mark/.append style={fill=.!70!black},   mark=pentagon*\\%
+	Plum,    every mark/.append style={fill=.!70!black},   mark=diamond*\\%
+	NavyBlue,every mark/.append style={fill=.!70!black},   mark=triangle*\\%
+}

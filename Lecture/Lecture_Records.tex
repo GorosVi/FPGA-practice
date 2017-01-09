@@ -1,0 +1,108 @@
+\documentclass[a4paper, 12pt]{extarticle}
+\usepackage{GS7}
+\sloppy
+
+\begin{document}
+	\def \nocredits {}
+
+\section{Записки с лекций курса MTK{\_}FPGA{\_}2016}
+\section{Лекция 3}
+
+	Порты в режимах input/ output/ inout.
+
+	\subsection{Параметризация модулей}
+
+		local param (aka) константа. Недоступна извне. По умолчанию int 32-bit.
+
+\begin{lstlisting}[language=Verilog]
+defparam - для задания величик констант, заданных через param
+defparam my_mod.MY_PARAM = ...
+\end{lstlisting}
+
+		"Решётка"
+
+\begin{lstlisting}[language=Verilog]
+module my_module #(
+	// parameter MY_param=1
+	.MY_PARAM (100)
+) inst (
+	.signal1(signal)
+)
+\end{lstlisting}
+
+		More - verilog package, define местами (`define MY{\_}DEF 22).
+		`MY{\_}DEF - использование
+
+
+
+	\subsection{Конечные автоматы}
+		Машина (Миле и Мура) - идеализация моделей конечных автоматов
+
+		Лифт.
+		%\img{3\01}
+
+		Список состояний
+		\begin{itemize}
+			\item Стоит
+			\item Едет вверх
+			\item Едет вниз
+		\end{itemize}
+		%\img{3\02}
+
+		Входные воздействия
+		\begin{itemize}
+			\item Приехал на этаж
+			\item Кнопка вверх
+			\item Кнопка вниз
+			\item Верхний этаж
+			\item Нижний этаж
+		\end{itemize}
+%		\img{3\03}
+
+		Выходные данные
+		\begin{itemize}
+			\item Ехать вних
+			\item Ехать вверх
+			\item Находимся в движении
+		\end{itemize}
+%		\img{3\04}
+
+	\begin{lstlisting}[language=Verilog]
+		module elevator (
+		input	clk_i,
+		input	srst_i,
+		...
+		)
+	\end{lstlisting}
+
+
+%24.11.16
+\section{Операторы SV}
+	\% остаток от деления
+	** Возведение  в степень
+	paramrter a =_width;
+
+	reg [a_width-1: 0] addr;
+	reg [7:0] mem [2*a_width-1; 0]
+
+	Если не подключить порт имодуля, он получит Z состояние при симуляции
+
+	Симуляция - узнать наличие незвестных (X) значений
+	we_have = ^a - если прилетит где-нибудь X -  даст X
+	we_have = ^a === 1'bx';
+
+	Приоритет слжения выше, чем у сдвига (но не возведения в степень)
+
+
+\section{Variable и Net}
+	reg a.
+
+%-7.11.16
+Блочная память
+	Можно включить регистр на выходе
+	Можно выставить начальное значение блока при включнии, но сбросить всю нельзя.
+
+
+
+
+\end{document}

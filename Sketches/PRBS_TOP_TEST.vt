@@ -1,0 +1,38 @@
+// Verilog Test Bench template for design : PRBS_TOP
+// 
+// Simulation tool : ModelSim-Altera (Verilog)
+// 
+`timescale 10 ps/ 10 ps
+
+module PRBS_TOP_TEST();
+parameter half_clock_ns = 6; // Half clock period
+parameter clock_ns = 2 * half_clock_ns;
+
+
+reg clk;
+reg srst = 0;
+wire dout;
+
+PRBS_TOP i1 (
+// port map - connection between master ports and signals/registers   
+        .clk(clk),
+        .srst(srst),
+        .dout(dout)
+);
+event terminate_sim;  
+initial begin  
+ @ (terminate_sim); 
+ #(half_clock_ns / 2) $stop; 
+end
+
+initial
+begin
+	clk = 0'b1;
+	srst = #(1 * half_clock_ns) 1'b1;
+	srst = #(1 * clock_ns) 1'b0;
+	#(20 * clock_ns) -> terminate_sim;
+end
+always
+	clk = #(half_clock_ns) ~clk;
+
+endmodule

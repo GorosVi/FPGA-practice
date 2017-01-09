@@ -1,0 +1,84 @@
+module prbs_gen (
+	output dout,
+	input srst,
+	input clk
+);
+reg [2:0] prbs_state;
+wire next_state;
+
+always @(posedge clk)
+	begin
+	if (srst)
+		prbs_state <= 3'b111;
+	else
+		prbs_state <= {prbs_state[1:0], next_state};
+	end
+	assign next_state = prbs_state[2] ^ prbs_state[1];
+	assign dout = next_state;
+
+endmodule
+
+Порты в режимах input/ output/ inout.
+
+Параметризация модулей
+	local param (aka) константа. Недоступна извне. По умолчанию int 32-bit.
+
+defparam - для задания величик констант, заданных через param
+defparam my_mod.MY_PARAM = ...
+
+"Решётка"
+
+module my_module #(
+	parameter MY_param=1 ... (строго перед (?))
+	input ...
+)л
+
+my_module #(
+	.MY_PARAM (100)
+)
+my_mod (
+	.signal1(signal)
+)
+
+More - verilog package, define местами (`define MY_DEF 22)
+`MY_DEF - использование
+
+
+
+\subsection{Конечные автоматы}
+	Машина (Миле и Мура) - идеализация моделей конечных автоматов
+
+	Лифт.
+	\img{3\01}
+
+	Список состояний
+	\begin{itemize}
+		\item Стоит
+		\item Едет вверх
+		\item Едет вниз
+	\end{itemize}
+	\img{3\02}
+
+	Входные воздействия
+	\begin{itemize}
+		\item Приехал на этаж
+		\item Кнопка вверх
+		\item Кнопка вниз
+		\item Верхний этаж
+		\item Нижний этаж
+	\end{itemize}
+	\img{3\03}
+
+	Выходные данные
+	\begin{itemize}
+		\item Ехать вних
+		\item Ехать вверх
+		\item Находимся в движении
+	\end{itemize}
+	\img{3\04}
+
+module elevator (
+input	clk_i,
+input	srst_i,
+
+)
