@@ -9,7 +9,7 @@ logic             clk;
 logic             srst;
 
 logic [WIDTH-1:0] data_i;
-logic             data_mod_i;
+logic [$clog2(WIDTH):0] data_mod_i;
 logic             data_val_i;
 
 logic             busy_o;
@@ -49,6 +49,15 @@ initial
 
 initial
 	begin : test_sequence_generator
+		data_i = '0;
+		data_val_i = 1'b0;
+		data_mod_i = 3'd0;
+		repeat (3) @( posedge clk );
+		data_i = 16'h55555555;
+		data_val_i = 1'b1;
+		data_mod_i = 5'd4;
+		@( posedge clk );
+		data_val_i = 1'b0;
 		repeat (10) @( posedge clk );
 		$stop;
 	end
