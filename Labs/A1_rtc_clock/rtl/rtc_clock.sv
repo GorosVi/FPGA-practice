@@ -1,7 +1,7 @@
 module rtc_clock (
 	// Рабочая частота модуля - 1KHz
-	input  wire              clk_i,
-	input  wire              srst_i,
+	input  wire        clk_i,
+	input  wire        srst_i,
 
 	input  wire  [2:0] cmd_type_i,
 	input  wire  [9:0] cmd_data_i,
@@ -55,13 +55,12 @@ always_ff @(posedge clk_i)
 
 always_comb
 	begin : clock_next_state
-		// Clock count
+		// Clock count and overflow control
 		cnt_milliseconds_new = cnt_milliseconds + 1'b1;
 		cnt_seconds_new = cnt_seconds;
 		cnt_minutes_new = cnt_minutes;
 		cnt_hours_new = cnt_hours;
 
-		// Clock overflow control
 		if( cnt_milliseconds == 'd999 )
 			begin
 				cnt_milliseconds_new = 0;
@@ -101,13 +100,13 @@ always_comb
 						end
 
 					SET_HOUR_CMD:
-						cnt_hours_new = cmd_data_i;
+						cnt_hours_new = cmd_data_i[4:0];
 
 					SET_MIN_CMD:
-						cnt_minutes_new = cmd_data_i;
+						cnt_minutes_new = cmd_data_i[5:0];
 
 					SET_SEC_CMD:
-						cnt_seconds_new = cmd_data_i;
+						cnt_seconds_new = cmd_data_i[5:0];
 
 					SET_MSEC_CMD:
 						cnt_milliseconds_new = cmd_data_i;
