@@ -11,7 +11,7 @@ logic key_o;
 
 
 localparam CLK_FREQ_MHZ = 20;
-localparam GLITCH_TIME_NS = 200;
+localparam GLITCH_TIME_NS = 1600;
 localparam GLITCH_TIME_CLK = GLITCH_TIME_NS * CLK_FREQ_MHZ / ( 10 ** 3 );
 
 
@@ -55,7 +55,7 @@ initial
 			end
 		key_i = 1'b0;
 
-		repeat (5) @( posedge clk );
+		repeat (25) @( posedge clk );
 
 		repeat (2) @( posedge clk );
 		repeat (GLITCH_TIME_CLK / 2)
@@ -67,7 +67,7 @@ initial
 			end
 		key_i = 1'b1;
 
-		repeat (5) @( posedge clk );
+		repeat (25) @( posedge clk );
 
 		key_i = 1'b0;
 		repeat (10) @( posedge clk );
