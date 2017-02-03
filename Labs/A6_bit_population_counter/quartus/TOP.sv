@@ -7,7 +7,7 @@ module TOP #(
 	input  wire  [WIDTH - 1 : 0]   data_i,
 	input  wire                    data_val_i,
 
-	output logic [$clog2(WIDTH) - 1 : 0] data_o,
+	output logic [$clog2(WIDTH):0] data_o,
 	output logic                   data_val_o
 );
 

@@ -2,7 +2,7 @@
 
 module tb;
 
-localparam WIDTH = 32;
+localparam WIDTH = 128;
 localparam CLK_HALF_PERIOD = 5;
 
 logic clk;
@@ -43,8 +43,10 @@ initial
 
 initial
 	begin : test_sequence_generator
+		data_i = 0;
+		data_val_i = 0;
 		repeat (10) @( posedge clk );
-		data_i = 1;
+		data_i = 128'hB5718774270F0F0F0F0F0F0F0F0F0F0F;
 		data_val_i = 1;
 		repeat (20)
 			begin

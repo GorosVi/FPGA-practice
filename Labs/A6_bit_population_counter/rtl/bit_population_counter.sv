@@ -1,6 +1,6 @@
 module bit_population_counter #(
 	parameter WIDTH = 8
-) (
+)(
 	input  wire                        clk_i,
 	input  wire                        srst_i,
 
@@ -11,11 +11,11 @@ module bit_population_counter #(
 	output logic                       data_val_o
 );
 
-// Assert on zero input !
 localparam CONV_DEPTH = $clog2(WIDTH);
 initial
 begin
-	$warning("CONV_DEPTH %d",CONV_DEPTH);
+	assert ( CONV_DEPTH == 0 ) $error ("Input data width = %d is too small for module", WIDTH);
+	assert ( WIDTH > 128     ) $error ("Input data width = %d is too big for module, max width = 128", WIDTH);
 end
 
 logic [CONV_DEPTH - 1 : 0]                interm_valid;
@@ -24,7 +24,7 @@ logic [CONV_DEPTH - 1 : 0][WIDTH - 1 : 0] interm_result_new;
 
 
 always_ff @(posedge clk_i)
-	begin : data_pipeline
+	begin: data_pipeline
 		if ( srst_i )
 			interm_valid [CONV_DEPTH - 1 : 0] <= 0;
 		else
@@ -39,16 +39,25 @@ always_ff @(posedge clk_i)
 			end
 	end
 
-localparam [4:0][15:0] const_array = {32'h0000ffff, 32'h00ff00ff, 32'h0f0f0f0f, 32'h33333333, 32'h55555555};
 
+localparam [0:6][127:0] bit_mask_array = {128'h55555555555555555555555555555555,
+                                          128'h33333333333333333333333333333333,
+                                          128'h0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F,
+                                          128'h00FF00FF00FF00FF00FF00FF00FF00FF,
+                                          128'h0000FFFF0000FFFF0000FFFF0000FFFF,
+                                          128'h00000000FFFFFFFF00000000FFFFFFFF,
+                                          128'h0000000000000000FFFFFFFFFFFFFFFF};
 always_comb
-	begin
+	begin: new_pipeline_values
 		for ( int i = 0; i < CONV_DEPTH; i++ )
-			interm_result_new[i] = ( ( ( interm_result[i] >> ( 2 ** i ) ) & const_array[i] ) + ( interm_result[i] & const_array[i] ) );
+			// In each step we adds half of bits with other half of bits, selected by bit-mask
+			interm_result_new[i] = ( ( ( interm_result[i] >> ( 2 ** i ) ) & bit_mask_array[i] )
+				                       + ( interm_result[i] & bit_mask_array[i] ) );
 	end
 
-// Data pipeline output. Last stage is not latched for speed optimisation (may be sometimes bad solution)
-assign data_o     = interm_result_new[ CONV_DEPTH - 1 ] ;
+
+// Data pipeline output. Last stage is not latched for speed optimisation (sometimes it may be bad solution)
+assign data_o     = interm_result_new[ CONV_DEPTH - 1][$clog2(WIDTH):0];
 assign data_val_o = interm_valid[ CONV_DEPTH - 1 ];
 
 
