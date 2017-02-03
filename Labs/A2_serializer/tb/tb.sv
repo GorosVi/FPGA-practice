@@ -53,12 +53,21 @@ initial
 		data_val_i = 1'b0;
 		data_mod_i = 3'd0;
 		repeat (3) @( posedge clk );
-		data_i = 16'h55555555;
+
+		data_i = 16'hC501;
 		data_val_i = 1'b1;
 		data_mod_i = 5'd4;
 		@( posedge clk );
 		data_val_i = 1'b0;
-		repeat (10) @( posedge clk );
+		repeat (20) @( posedge clk );
+
+		// re-run with smaller number of data_valid_bits
+		@( posedge clk );
+		data_val_i = 1'b1;
+		data_mod_i = 5'd2;
+		@( posedge clk );
+		data_val_i = 1'b0;
+		repeat (20) @( posedge clk );
 		$stop;
 	end
 
