@@ -4,7 +4,7 @@ module tb;
 
 localparam CLK_HALF_PERIOD = 5;
 localparam DWIDTH = 8,
-           AWIDTH = 2;
+           AWIDTH = 3;
 
 logic              clk_i;
 logic              srst_i;
@@ -20,6 +20,7 @@ logic [AWIDTH-1:0] usedw_o;
 
 
 fifo #(
+	.SHOWAHEAD ( "ON"  ),
 	.AWIDTH  ( AWIDTH  ),
 	.DWIDTH  ( DWIDTH  )
 ) i_fifo (
@@ -58,7 +59,25 @@ initial
 		data_i  = 0;
 		repeat (5) @( posedge clk_i );
 
-		repeat (7)
+		// Test sequence from lecture slides
+		wrreq_i = 1'b1;
+		@( posedge clk_i );
+		data_i = data_i + 1;
+		@( posedge clk_i );
+		data_i = data_i + 1;
+		rdreq_i = 1;
+		@( posedge clk_i );
+		data_i = data_i + 1;
+		@( posedge clk_i );
+		wrreq_i = 0;
+		@( posedge clk_i );
+		@( posedge clk_i );
+		rdreq_i = 0;
+
+		repeat (10) @( posedge clk_i );
+
+		// Full load and unload test
+		repeat (9)
 			begin
 				wrreq_i = 1'b1;
 				data_i = data_i + 1;
@@ -66,9 +85,9 @@ initial
 				wrreq_i = 0;
 			end
 
-		repeat (5) @( posedge clk_i );
+		repeat (10) @( posedge clk_i );
 
-		repeat (7)
+		repeat (9)
 			begin
 				rdreq_i = 1'b1;
 				data_i = data_i + 1;

@@ -19,48 +19,43 @@ module fifo #(
 localparam ARRAY_SIZE = ( 2 ** AWIDTH - 1 );
 
 reg   [DWIDTH-1:0] mem [ARRAY_SIZE:0];
+logic [DWIDTH-1:0] q_default, q_showahead;
 logic [AWIDTH  :0] used_width;
-logic [AWIDTH  :0] read_ptr, read_ptr_new,
-                   write_ptr, write_ptr_new;
+logic [AWIDTH  :0] read_ptr, write_ptr;
 
 
 always_ff @( posedge clk_i )
-	begin
+	begin : fifo_pointer_control
 		if( srst_i )
 			begin
-				read_ptr  <= 0;
-				write_ptr <= 0;
-				q_o       <= 0;
+				read_ptr  <= '0;
+				write_ptr <= '0;
 			end
 		else
 			begin
-				if( wrreq_i )
-					begin
-						mem[write_ptr] <= data_i;
-						write_ptr      <= write_ptr_new;
-					end
-				if( rdreq_i )
-					begin
-						q_o       <= mem[read_ptr];
-						read_ptr  <= read_ptr_new;
-					end
-				q_o       <= mem[read_ptr];
+				read_ptr       <= ( rdreq_i && ~empty_o ) ? ( read_ptr  + 1'b1 ) : ( read_ptr  );
+				write_ptr      <= ( wrreq_i && ~full_o  ) ? ( write_ptr + 1'b1 ) : ( write_ptr );
 			end
 	end
 
 
+always_ff @( posedge clk_i )
+	begin : fifo_memory_operations
+		if( wrreq_i && ~full_o )
+			mem[write_ptr[AWIDTH-1:0]] <= data_i;
+		if( rdreq_i && ~empty_o )
+			q_default <= mem[read_ptr[AWIDTH-1:0]];
+	end
+
+assign q_showahead = mem [read_ptr[AWIDTH-1:0]];
+
+
 always_comb
-	begin
-		used_width = write_ptr - read_ptr;
-		usedw_o = used_width;
-
-		empty_o = ( used_width == 0 );
-		full_o  = ( used_width == 2 ** AWIDTH );
-
-		read_ptr_new  = ( ~empty_o ) ? ( read_ptr + 1'b1 ):
-		                               ( read_ptr );
-		write_ptr_new = ( ~full_o )  ? ( write_ptr + 1'b1 ):
-		                               ( write_ptr );
+	begin : fifo_output_control
+		q_o = ( SHOWAHEAD != "ON" ) ? ( q_default ) : ( q_showahead );
+		usedw_o = write_ptr - read_ptr;
+		empty_o = ( write_ptr == read_ptr );
+		full_o  = ( ( write_ptr - read_ptr ) == ( 2 ** ( AWIDTH ) ) );
 	end
 
 
