@@ -20,7 +20,7 @@ logic [AWIDTH-1:0] usedw_o;
 
 
 fifo #(
-	.SHOWAHEAD ( "ON"  ),
+	.SHOWAHEAD ( "OFF"  ),
 	.AWIDTH  ( AWIDTH  ),
 	.DWIDTH  ( DWIDTH  )
 ) i_fifo (
