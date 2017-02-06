@@ -68,7 +68,7 @@ always_ff @(posedge clk_i)
 // Sequence for green_blink and uncontrolled state
 always_ff @(posedge clk_i)
 	begin : blinker_timer_control
-		if( srst_i || blinker_reset )
+		if( blinker_reset )
 			begin
 				blinker_timer  <= BLINK_HALF_PERIOD - 1'b1;
 				blinker_output <= 0;
@@ -99,89 +99,88 @@ always_ff @(posedge clk_i)
 	end
 
 
+assign cmd_force_change_state = ( ( cmd_type_i == CMD_OFF ) || ( cmd_type_i == CMD_OFF_CONTROL ) );
+
 always_comb
 	begin : FSM_next_state
 		state_next = state;
 		blinker_reset = 0;
-		// State timeout countdown
-		if ( timeout_counter != 0 )
-			timeout_counter_next = timeout_counter - 1'b1;
-		else
-			timeout_counter_next = 0;
-
-		case ( state )
-
-			RED_ON_S:
-				if( timeout_counter == 0 )
-					begin
-						state_next = RED_YELLOW_ON_S;
-						timeout_counter_next = RED_YELLOW_TIME - 1'b1;
-					end
-
-			RED_YELLOW_ON_S:
-				if( timeout_counter == 0 )
-					begin
-						state_next = GREEN_ON_S;
-						timeout_counter_next = green_timeout_value - 1'b1;
-					end
-
-			GREEN_ON_S:
-				if( timeout_counter == 0 )
-					begin
-						state_next = GREEN_BLINK_S;
-						timeout_counter_next = GREEN_BLINK_TIME - 1'b1;
-						blinker_reset = 1'b1;
-				end
-
-			GREEN_BLINK_S:
-				if( timeout_counter == 0 )
-					begin
-						state_next = YELLOW_ON_S;
-						timeout_counter_next = yellow_timeout_value - 1'b1;
-					end
-
-			YELLOW_ON_S:
-				if( timeout_counter == 0 )
-					begin
-						state_next = RED_ON_S;
-						timeout_counter_next = red_timeout_value - 1'b1;
-					end
-
-			OFF_S, UNCONTROLLED_S:
-				if( cmd_valid_i && ( cmd_type_i == CMD_ON ) )
-					begin
-						state_next = RED_ON_S;
-						timeout_counter_next = red_timeout_value - 1'b1;
-					end
-
-		endcase
-
-		if( cmd_valid_i == 1'b1 )
+		timeout_counter_next = ( timeout_counter != 0 ) ? ( timeout_counter - 1'b1 ) :
+		                                                  ( 0                      );
+		if( cmd_valid_i && cmd_force_change_state )
 			case ( cmd_type_i )
 				CMD_OFF:         state_next = OFF_S;
 				CMD_OFF_CONTROL: state_next = UNCONTROLLED_S;
 				default:;
 			endcase
+		else
+			case( state )
+
+				RED_ON_S:
+					if( timeout_counter == 0 )
+						begin
+							state_next = RED_YELLOW_ON_S;
+							timeout_counter_next = RED_YELLOW_TIME - 1'b1;
+						end
+
+				RED_YELLOW_ON_S:
+					if( timeout_counter == 0 )
+						begin
+							state_next = GREEN_ON_S;
+							timeout_counter_next = green_timeout_value - 1'b1;
+						end
+
+				GREEN_ON_S:
+					if( timeout_counter == 0 )
+						begin
+							state_next = GREEN_BLINK_S;
+							timeout_counter_next = GREEN_BLINK_TIME - 1'b1;
+							blinker_reset = 1'b1;
+					end
+
+				GREEN_BLINK_S:
+					if( timeout_counter == 0 )
+						begin
+							state_next = YELLOW_ON_S;
+							timeout_counter_next = yellow_timeout_value - 1'b1;
+						end
+
+				YELLOW_ON_S:
+					if( timeout_counter == 0 )
+						begin
+							state_next = RED_ON_S;
+							timeout_counter_next = red_timeout_value - 1'b1;
+						end
+
+				OFF_S, UNCONTROLLED_S:
+					if( cmd_valid_i && ( cmd_type_i == CMD_ON ) )
+						begin
+							state_next = RED_ON_S;
+							timeout_counter_next = red_timeout_value - 1'b1;
+						end
+
+			endcase
+
 	end
 
 
-always_comb
+always_ff @(posedge clk_i)
 	begin : FSM_output_generate
-		red_o = 0;
-		yellow_o = 0;
-		green_o = 0;
+		red_o    <= 0;
+		yellow_o <= 0;
+		green_o  <= 0;
 
 		case ( state )
-			RED_ON_S:        red_o    = 1'b1;
-			YELLOW_ON_S:     yellow_o = 1'b1;
-			GREEN_ON_S:      green_o  = 1'b1;
+			RED_ON_S:        red_o    <= 1'b1;
+			YELLOW_ON_S:     yellow_o <= 1'b1;
+			GREEN_ON_S:      green_o  <= 1'b1;
 			RED_YELLOW_ON_S:
 				begin
-					red_o    = 1'b1;
-					yellow_o = 1'b1;
+					red_o    <= 1'b1;
+					yellow_o <= 1'b1;
 				end
-			GREEN_BLINK_S:   green_o  = blinker_output;
-			UNCONTROLLED_S:  yellow_o = blinker_output;
+			GREEN_BLINK_S:   green_o  <= blinker_output;
+			UNCONTROLLED_S:  yellow_o <= blinker_output;
 			OFF_S:;
 			default:; // no action - output default zeros
 		endcase
