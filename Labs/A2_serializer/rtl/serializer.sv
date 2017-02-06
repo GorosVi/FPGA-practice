@@ -38,7 +38,7 @@ always_ff @(posedge clk_i)
 
 always_comb
 	begin : serial_transmitter_state_new
-		if( data_val_i && ( data_mod_i > 3 ) && ( data_mod_i < WIDTH ) )
+		if( data_val_i && ( data_mod_i > 3 ) && ( data_mod_i <= WIDTH ) )
 			begin
 				data_reg_new       = data_i;
 				rem_tx_counter_new = data_mod_i;
