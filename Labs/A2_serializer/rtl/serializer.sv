@@ -25,7 +25,7 @@ always_ff @(posedge clk_i)
 	begin : serial_transmitter_control
 		if( srst_i )
 			begin
-				data_reg       <= '0;
+				// data_reg       <= '0;
 				rem_tx_counter <= '0;
 			end
 		else
@@ -38,22 +38,25 @@ always_ff @(posedge clk_i)
 
 always_comb
 	begin : serial_transmitter_state_new
-		data_reg_new       = { data_reg[WIDTH-2:0], 1'b0 };
-		rem_tx_counter_new = ( rem_tx_counter != 0 ) ? ( rem_tx_counter - 1'b1 ) :
-		                                               ( 1'b0 );
-		if( data_val_i && ( data_mod_i > 3 )  )
+		if( data_val_i && ( data_mod_i > 3 ) && ( data_mod_i < WIDTH ) )
 			begin
 				data_reg_new       = data_i;
 				rem_tx_counter_new = data_mod_i;
 			end
+		else
+			begin
+				data_reg_new       = { data_reg[WIDTH-2:0], 1'b0 };
+				rem_tx_counter_new = ( rem_tx_counter != 0 ) ? ( rem_tx_counter - 1'b1 ) :
+		                                               ( 1'b0 );
+			end
 	end
 
 
-always_comb
+always_ff @(posedge clk_i)
 	begin : serial_transmitter_output
-		ser_data_o     = data_reg[WIDTH-1];
-		ser_data_val_o = ( rem_tx_counter != 0 );
-		busy_o         = ( rem_tx_counter != 0 );
+		ser_data_o     <= data_reg[WIDTH-1];
+		ser_data_val_o <= ( rem_tx_counter != 0 );
+		busy_o         <= ( rem_tx_counter != 0 );
 	end
 
 
