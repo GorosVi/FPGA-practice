@@ -80,7 +80,7 @@ initial
 		eop_i  = 0;
 		val_i  = 0;
 
-		repeat (5) @( posedge clk_i );
+		repeat (10) @( posedge clk_i );
 
 		repeat (5) @( posedge clk_i );
 		$stop;

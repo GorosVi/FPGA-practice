@@ -103,63 +103,87 @@ always_ff @( posedge clk_i )
 
 assign input_words_count = write_ptr;
 
-always_ff @( posedge clk_i )
-	begin
-		if( val_i )
-			mem[write_ptr_new] <= data_i;
-	end
 
 
-logic[AWIDTH-1:0] max_read_ptr, max_read_ptr_new,
-                  min_read_ptr, min_read_ptr_new,
+
+logic[AWIDTH-1:0] max_read_ptr,
+                  min_read_ptr,
                   max_sorted_addr,
                   min_sorted_addr;
 
-logic[DWIDTH-1:0] min_read_actual_data,
-                  max_read_actual_data,
-                  max_read_prev_data,
-                  min_read_prev_data,
+logic[DWIDTH-1:0] min_read_data,
+                  max_read_data,
                   min_write_data,
                   max_write_data;
 
+logic data_swap;
+
 always_ff @( posedge clk_i )
 	begin
-		if( state == RECEIVE_S )
+		if( state == SORTING_S )
 			begin
-				max_sorted_addr <= input_words_count;
+				if( min_read_ptr == min_sorted_addr )
+					min_read_ptr  <= min_read_ptr + 1'b1;
+				else if( min_read_ptr == max_sorted_addr)
+					begin
+						max_sorted_addr <= max_sorted_addr - 1;
+						max_read_ptr <= max_read_ptr - 1;
+						min_read_ptr <= 0;
+					end
+				else
+					min_read_ptr  <= min_read_ptr + 1'b1;
+			end
+		else
+			begin
+				max_sorted_addr <= write_ptr_new;// input_words_count;
+				max_read_ptr <= write_ptr_new;//input_words_count;
 				min_sorted_addr <= '0;
-				max_read_ptr <= input_words_count;
 				min_read_ptr <= '0;
 			end
-		if( state == SORTING_S )
-			if( min_read_ptr == min_sorted_addr )
-				begin
-					min_read_prev_data <= min_read_actual_data;
-					min_read_ptr  <= min_read_ptr + 1'b1;
-				end
-			else
-				if( min_read_ptr <= max_sorted_addr )
-					begin
-						min_read_prev_data <= min_read_actual_data;
-						min_read_ptr  <= min_read_ptr + 1'b1;
-						data_o <= min_read_actual_data;
-				end
+
+		// if( state == SORTING_S )
+		// 	sorting_ok <= ( min_read_ptr == max_sorted_addr ) ? ( 1 ) : ( 0 );
+		// else
+			sorting_ok <= 0;
 
 	end
 
 always_comb
 	begin
-		if( state == SORTING_S )
-			min_read_actual_data = mem[min_read_ptr];
+		if( ( state == SORTING_S ) && ( min_read_data > max_read_data ) )
+			data_swap <= 1'b1;
 		else
-			min_read_actual_data = 0;
-
-		if( state == SORTING_S )
-			sorting_ok = ( min_read_ptr == max_sorted_addr ) ? ( 1 ) : ( 0 );
-		else
-			sorting_ok = 0;
+			data_swap <= 0;
 	end
 
+
+
+assign busy_o = data_swap;
+assign data_o = min_read_data;
+always_comb
+	begin : memory_read_operations
+		if( state == SORTING_S )
+			begin
+				min_read_data = mem[min_read_ptr];
+				max_read_data = mem[max_read_ptr];
+			end
+		else
+			begin
+				min_read_data = 'x;
+				max_read_data = 'x;
+			end
+	end
+
+always_ff @( posedge clk_i )
+	begin : memory_write_operations
+		if( val_i && ( state == RECEIVE_S ) )
+			mem[write_ptr_new] <= data_i;
+		else if( data_swap && ( state == SORTING_S ) )
+			begin
+				mem[min_read_ptr] <= max_read_data;
+				mem[max_read_ptr] <= min_read_data;
+			end
+	end
 
 
 
