@@ -103,6 +103,47 @@ module my_module #(
 	Можно выставить начальное значение блока при включнии, но сбросить всю нельзя.
 
 
+%09.02.17
+
+Avalon.
+
+streaming interface
+\begin{itemize}
+	\item Source
+	\item data >, valid >, [ ready < ], \|, [ start_of_pcaket > ], [ end_of_pcaket > ], [ empty > (== 0) only when EOP == 1;], [ channel > ]
+	\item Sink
+\end{itemize}
+
+Memory mapped
+\begin{itemize}
+	\item Master
+	\item address >, read >, write >, writedata >, writerequest >, readdata <, readdatavalid <, [byteena], [burst],
+	\item Slave
+\end{itemize}
+
+Индекс для смешанных массивов  считается слева направо, сначала инекс неупакоыванного массива, потом упакованного
+
+int [a:a][b:b] c [d:d] [e:e]
+
+a = c[d:d][e:e][a:a][b:b]
+
+Чтобы передать значение в функцию по указателю можно использовать тип ref, помимо обычных input и output.
+
+Task: значение выходной переменной задаётся по выходу из task
+
+
+Процессы
+initial
+	begin
+		fork
+			begin
+			end
+			
+			begin
+			end
+		
+		loin
+	end
 
 
 \end{document}
