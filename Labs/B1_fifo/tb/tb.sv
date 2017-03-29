@@ -66,17 +66,22 @@ initial
 		wrreq_i = 1'b1;
 		@( posedge clk_i );
 		data_i = data_i + 1;
-		rdreq_i = 1;
+		if( SHOWAHEAD != "ON" )
+			rdreq_i = 1;
 		@( posedge clk_i );
 		data_i = data_i + 1;
+		if( SHOWAHEAD == "ON" )
+			rdreq_i = 1;
 		@( posedge clk_i );
-		// rdreq_i = 0;
 		data_i = data_i + 1;
 		@( posedge clk_i );
 		wrreq_i = 0;
 		@( posedge clk_i );
-		rdreq_i = 0;
+		if( SHOWAHEAD != "ON" )
+			rdreq_i = 0;
 		@( posedge clk_i );
+		if( SHOWAHEAD == "ON" )
+			rdreq_i = 0;
 		@( posedge clk_i );
 		rdreq_i = 0;
 
