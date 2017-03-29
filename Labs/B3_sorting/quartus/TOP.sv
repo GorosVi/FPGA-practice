@@ -1,6 +1,6 @@
 module TOP #(
 	parameter DWIDTH = 8,
-	          AWIDTH = 4
+	          AWIDTH = 8
 )(
 	input  wire              clk_i,
 	input  wire              srst_i,
