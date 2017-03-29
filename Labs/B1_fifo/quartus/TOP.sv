@@ -12,7 +12,7 @@ module TOP #(
 	output logic [DWIDTH-1:0] q_o,
 	output logic              empty_o,
 	output logic              full_o,
-	output logic [AWIDTH-1:0] usedw_o
+	output logic [AWIDTH  :0] usedw_o
 );
 
 
