@@ -66,6 +66,17 @@ initial
 		repeat (5) @( posedge clk_i );
 
 		sop_i  = 1'b1;
+		eop_i  = 1'b1;
+		val_i  = 1'b1;
+		data_i = 'h0d;
+		@( posedge clk_i );
+		sop_i  = 0;
+		eop_i  = 0;
+		val_i  = 0;
+
+		@( negedge busy_o );
+
+		sop_i  = 1'b1;
 		val_i  = 1'b1;
 		data_i = 'h0a;
 		@( posedge clk_i );
@@ -80,9 +91,10 @@ initial
 		eop_i  = 0;
 		val_i  = 0;
 
-		repeat (10) @( posedge clk_i );
+		@( negedge busy_o );
 
-		repeat (15) @( posedge clk_i );
+		repeat (3) @( posedge clk_i );
+
 		$stop;
 	end
 

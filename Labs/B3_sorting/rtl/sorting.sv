@@ -25,7 +25,7 @@ enum logic [1:0] { RECEIVE_S,
 logic sort_finished;
 
 always_ff @( posedge clk_i )
-	state = ( srst_i ) ? ( RECEIVE_S ) : ( state_next );
+	state <= ( srst_i ) ? ( RECEIVE_S ) : ( state_next );
 
 always_comb
 	begin : FSM_state_next
@@ -37,42 +37,44 @@ always_comb
 		endcase
 	end
 
-logic[AWIDTH-1:0] input_write_ptr, input_write_ptr_new;
+
+logic[AWIDTH-1:0] input_write_ptr;
 logic[AWIDTH-1:0] input_words_count;
-assign input_words_count = input_write_ptr_new;
-
+assign input_words_count = input_write_ptr;
 
 always_ff @( posedge clk_i )
-	input_write_ptr <= ( srst_i ) ? ( '0 ) : ( input_write_ptr_new );
-
-always_comb
-	if( val_i && ( state == RECEIVE_S ) )
-		if ( sop_i )
-			input_write_ptr_new = 0;
-		else
-			input_write_ptr_new = input_write_ptr + 1'b1;
+	if( srst_i )
+		input_write_ptr <= '0;
 	else
-		input_write_ptr_new = input_write_ptr;
+		if( val_i && ( state == RECEIVE_S ) )
+			input_write_ptr <= input_write_ptr + 1'b1;
+		// Bad hook on state_next
+		else if( ( state == OUTPUT_S ) && ( state_next == RECEIVE_S ) )
+			input_write_ptr <= '0;
+		else
+			input_write_ptr <= input_write_ptr;
 
 
-
-logic[AWIDTH-1:0] sort_ptr_start, sort_ptr_end, sort_ptr_new;
+logic[AWIDTH-1:0] sort_ptr_start, sort_ptr_end, sort_ptr_mem;
 logic[DWIDTH-1:0] sort_data_a,    sort_data_b;
-logic sort_swap_op = '0;
+logic sort_swap_op;
 
-assign sort_ptr_new = ( sort_swap_op ) ? ( sort_ptr_start ) : ( sort_ptr_start + 1'b1 );
+// This ptr is needed to be deleted. But new increases after comparsion and breaks the data.
+assign sort_ptr_mem = ( sort_swap_op ) ? ( sort_ptr_start ) : ( sort_ptr_start + 1'b1 );
 
 always_ff @( posedge clk_i )
+	// Check val_i to skip one clock cycle after data reading
 	if( ( state == SORTING_S ) && ~val_i )
-		begin
-			if( ( sort_ptr_start < sort_ptr_end ) && ~sort_swap_op )
-				sort_ptr_start <= sort_ptr_new;
-			else if( sort_ptr_start == sort_ptr_end )
+		if ( sort_swap_op )
+			sort_ptr_start <= sort_ptr_start;
+		else
+			if( sort_ptr_start < sort_ptr_end - 1'b1 )
+				sort_ptr_start <= sort_ptr_start + 1'b1;
+			else
 				begin
 					sort_ptr_end <= sort_ptr_end - 1'b1;
 					sort_ptr_start <= '0;
 				end
-		end
 	else
 		begin
 			sort_ptr_start <= '0;
@@ -81,13 +83,15 @@ always_ff @( posedge clk_i )
 
 always_ff @( posedge clk_i )
 	begin
-		if( ( state == SORTING_S ) && ( sort_ptr_end == 1'b0 ) )
+		// Can not work in data sets less than 2 bytes
+		if( ( state == SORTING_S ) && ( sort_ptr_end <= 1'b1 ) )
 			sort_finished <= 1'b1;
 		else
 			sort_finished <= 1'b0;
 	end
 
 always_comb
+	// Check val_i to skip one clock cycle after data reading
 	if( ( state == SORTING_S ) && ~val_i )
 		if( sort_data_a > sort_data_b )
 			sort_swap_op <= 1'b1;
@@ -96,18 +100,18 @@ always_comb
 	else
 		sort_swap_op <= '0;
 
-
+// After sort execution mem_ptr_a should be set to 0, to ensure properly output work
 logic[AWIDTH-1:0] out_read_ptr, out_read_ptr_new;
 
 always_ff @( posedge clk_i )
-		out_read_ptr <= ( srst_i ) ? ( '0 ) : ( out_read_ptr_new );
-
-always_comb
-	if( state == OUTPUT_S )
-		out_read_ptr_new = out_read_ptr + 1'b1;
+	if( srst_i )
+		out_read_ptr <= '0;
 	else
-		out_read_ptr_new = '0;
-
+	// Bad hook to state_next
+		if( state_next == OUTPUT_S )
+			out_read_ptr <= out_read_ptr + 1'b1;
+		else
+			out_read_ptr <= '0;
 
 
 logic             mem_wren_a,  mem_wren_b;
@@ -127,21 +131,21 @@ always_comb
 			RECEIVE_S :
 				begin
 					mem_wren_a = '1;
-					mem_ptr_a = input_write_ptr_new;
+					mem_ptr_a = input_write_ptr;
 					mem_data_a = data_i;
 				end
 			SORTING_S :
 				begin
 					mem_wren_a = sort_swap_op;
 					mem_wren_b = sort_swap_op;
-					mem_ptr_a = sort_ptr_new - 1'b1;
-					mem_ptr_b = sort_ptr_new;
+					mem_ptr_a = sort_ptr_mem - 1'b1;
+					mem_ptr_b = sort_ptr_mem;
 					mem_data_a = sort_data_b;
 					mem_data_b = sort_data_a;
 				end
 			OUTPUT_S :
 				begin
-					mem_ptr_b = out_read_ptr;
+					mem_ptr_a = out_read_ptr;
 				end
 			default : ;
 		endcase
@@ -149,19 +153,11 @@ always_comb
 
 always_comb
 	begin : mem_output_mappings
-		if( state == SORTING_S )
-			begin
-				sort_data_a = mem_q_a;
-				sort_data_b = mem_q_b;
-			end
-		else
-			begin
-				sort_data_a = 'x;
-				sort_data_b = 'x;
-			end
+		sort_data_a = mem_q_a;
+		sort_data_b = mem_q_b;
 
 		if( state == OUTPUT_S )
-			data_o = mem_q_b;
+			data_o = mem_q_a;
 		else
 			data_o = 'x;
 	end
@@ -183,28 +179,28 @@ true_dual_port_ram_single_clock #(
 );
 
 
-
-always_ff @( posedge clk_i )
+always_comb
 	begin
-		if( ( state == OUTPUT_S ) && ( out_read_ptr == 1'b0 ) )
-			sop_o <= 1'b1;
+		// Triggers on value == 1, so first byte was already acquired
+		if( ( state == OUTPUT_S ) && ( out_read_ptr == 1'b1 ) )
+			sop_o = 1'b1;
 		else
-			sop_o <= 0;
+			sop_o = 0;
 
 		if( ( state == OUTPUT_S ) && ( out_read_ptr == input_words_count ) )
-			eop_o <= 1'b1;
+			eop_o = 1'b1;
 		else
-			eop_o <= 0;
+			eop_o = 0;
 
 		if( ( state == OUTPUT_S ) && ( out_read_ptr <= input_words_count ) )
-			val_o <= 1'b1;
+			val_o = 1'b1;
 		else
-			val_o <= 0;
+			val_o = 0;
 
-		// if( ( state_next == SORTING_S ) || ( state_next == OUTPUT_S ) && ( out_read_ptr <= input_words_count ) )
-		// 	busy_o <= 1'b1;
-		// else
-		// 	busy_o <= 0;
+		if( ( state == SORTING_S ) || ( state == OUTPUT_S ) )
+			busy_o = 1'b1;
+		else
+			busy_o = 0;
 	end
 
 
