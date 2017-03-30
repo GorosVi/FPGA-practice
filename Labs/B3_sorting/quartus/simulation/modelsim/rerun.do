@@ -9,6 +9,7 @@ if {[file exists rtl_work]} {
 vlib rtl_work
 vmap work rtl_work
 
+vlog -sv -work work +incdir+D:/Metrotek/Labs/B3_sorting/rtl {D:/Metrotek/Labs/B3_sorting/rtl/mem_core.sv}
 vlog -sv -work work +incdir+D:/Metrotek/Labs/B3_sorting/rtl {D:/Metrotek/Labs/B3_sorting/rtl/sorting.sv}
 vlog -sv -work work +incdir+D:/Metrotek/Labs/B3_sorting/quartus {D:/Metrotek/Labs/B3_sorting/quartus/TOP.sv}
 

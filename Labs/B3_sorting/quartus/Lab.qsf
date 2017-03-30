@@ -64,6 +64,7 @@ set_global_assignment -name EDA_TEST_BENCH_NAME default_testbench -section_id ed
 set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id default_testbench
 set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME tb -section_id default_testbench
 set_global_assignment -name EDA_TEST_BENCH_FILE ../tb/tb.sv -section_id default_testbench
+set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/mem_core.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/sorting.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../tb/tb.sv
 set_global_assignment -name SYSTEMVERILOG_FILE TOP.sv

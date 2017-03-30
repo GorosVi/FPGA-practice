@@ -18,18 +18,14 @@ module sorting #(
 	output logic              busy_o
 );
 
-localparam ARRAY_SIZE = ( 2 ** AWIDTH - 1 );
-
-reg   [DWIDTH-1:0] mem [ARRAY_SIZE:0];
-
 enum logic [1:0] { RECEIVE_S,
                    SORTING_S,
                    OUTPUT_S   } state, state_next;
 
+logic sort_finished;
+
 always_ff @( posedge clk_i )
 	state = ( srst_i ) ? ( RECEIVE_S ) : ( state_next );
-
-logic sort_finished;
 
 always_comb
 	begin : FSM_state_next
@@ -41,19 +37,13 @@ always_comb
 		endcase
 	end
 
-
-logic[AWIDTH-1:0] out_read_ptr;
-logic[DWIDTH-1:0] out_read_data;
-
-logic input_read_data;
-
 logic[AWIDTH-1:0] input_write_ptr, input_write_ptr_new;
-
 logic[AWIDTH-1:0] input_words_count;
-assign input_words_count = input_write_ptr;
+assign input_words_count = input_write_ptr_new;
+
 
 always_ff @( posedge clk_i )
-	input_write_ptr <= ( srst_i ) ? ( 0 ) : ( input_write_ptr_new );
+	input_write_ptr <= ( srst_i ) ? ( '0 ) : ( input_write_ptr_new );
 
 always_comb
 	if( val_i && ( state == RECEIVE_S ) )
@@ -65,139 +55,151 @@ always_comb
 		input_write_ptr_new = input_write_ptr;
 
 
-logic[AWIDTH-1:0] min_read_ptr,
-                  max_read_ptr;
-logic[DWIDTH-1:0] min_read_data,
-                  max_read_data,
-                  min_write_data,
-                  max_write_data;
-logic sorting_data_swap;
+
+logic[AWIDTH-1:0] sort_ptr_start, sort_ptr_end, sort_ptr_new;
+logic[DWIDTH-1:0] sort_data_a,    sort_data_b;
+logic sort_swap_op = '0;
+
+assign sort_ptr_new = ( sort_swap_op ) ? ( sort_ptr_start ) : ( sort_ptr_start + 1'b1 );
+
+always_ff @( posedge clk_i )
+	if( ( state == SORTING_S ) && ~val_i )
+		begin
+			if( ( sort_ptr_start < sort_ptr_end ) && ~sort_swap_op )
+				sort_ptr_start <= sort_ptr_new;
+			else if( sort_ptr_start == sort_ptr_end )
+				begin
+					sort_ptr_end <= sort_ptr_end - 1'b1;
+					sort_ptr_start <= '0;
+				end
+		end
+	else
+		begin
+			sort_ptr_start <= '0;
+			sort_ptr_end <= input_words_count;
+		end
 
 always_ff @( posedge clk_i )
 	begin
+		if( ( state == SORTING_S ) && ( sort_ptr_end == 1'b0 ) )
+			sort_finished <= 1'b1;
+		else
+			sort_finished <= 1'b0;
+	end
+
+always_comb
+	if( ( state == SORTING_S ) && ~val_i )
+		if( sort_data_a > sort_data_b )
+			sort_swap_op <= 1'b1;
+		else
+			sort_swap_op <= '0;
+	else
+		sort_swap_op <= '0;
+
+
+logic[AWIDTH-1:0] out_read_ptr, out_read_ptr_new;
+
+always_ff @( posedge clk_i )
+		out_read_ptr <= ( srst_i ) ? ( '0 ) : ( out_read_ptr_new );
+
+always_comb
+	if( state == OUTPUT_S )
+		out_read_ptr_new = out_read_ptr + 1'b1;
+	else
+		out_read_ptr_new = '0;
+
+
+
+logic             mem_wren_a,  mem_wren_b;
+logic[AWIDTH-1:0] mem_ptr_a,   mem_ptr_b;
+logic[DWIDTH-1:0] mem_data_a,  mem_data_b,
+                  mem_q_a,     mem_q_b;
+
+always_comb
+	begin : memory_pointer_control
+		mem_wren_a  = '0;
+		mem_wren_b  = '0;
+		mem_ptr_a   = 'x;
+		mem_ptr_b   = 'x;
+		mem_data_a  = 'x;
+		mem_data_b  = 'x;
+		case( state )
+			RECEIVE_S :
+				begin
+					mem_wren_a = '1;
+					mem_ptr_a = input_write_ptr_new;
+					mem_data_a = data_i;
+				end
+			SORTING_S :
+				begin
+					mem_wren_a = sort_swap_op;
+					mem_wren_b = sort_swap_op;
+					mem_ptr_a = sort_ptr_new - 1'b1;
+					mem_ptr_b = sort_ptr_new;
+					mem_data_a = sort_data_b;
+					mem_data_b = sort_data_a;
+				end
+			OUTPUT_S :
+				begin
+					mem_ptr_b = out_read_ptr;
+				end
+			default : ;
+		endcase
+	end
+
+always_comb
+	begin : mem_output_mappings
 		if( state == SORTING_S )
 			begin
-				if( min_read_ptr == max_read_ptr - 1'b1 )
-					begin
-						min_read_ptr <= 0;
-						max_read_ptr <= max_read_ptr - 1'b1;
-						min_write_data <= min_read_data;
-						max_write_data <= max_read_data;
-					end
-				else
-					begin
-						min_read_ptr <= min_read_ptr + 1'b1;
-						min_write_data <= min_read_data;
-						max_write_data <= max_read_data;
-					end
-				// sorting_data_swap <= ( min_read_data > max_read_data );
+				sort_data_a = mem_q_a;
+				sort_data_b = mem_q_b;
 			end
 		else
 			begin
-				min_read_ptr <= '1;// за костыль
-				max_read_ptr <= input_write_ptr_new + 1'b1; //input_words_count;
-				min_write_data <= 0;
-				max_write_data <= 0;
-				// sorting_data_swap <= 0;
-		end
-	end
+				sort_data_a = 'x;
+				sort_data_b = 'x;
+			end
 
-always_comb
-	begin
-		sort_finished     = ( max_read_ptr == 0 );
-		sorting_data_swap = ( min_read_data > max_read_data );
-	end
-
-always_ff @( posedge clk_i )
-	begin
-		if( srst_i )
-			out_read_ptr <= '0;
+		if( state == OUTPUT_S )
+			data_o = mem_q_b;
 		else
-			if( state == OUTPUT_S )
-				out_read_ptr <= out_read_ptr + 1'b1;
-			else
-				out_read_ptr <= '0;
+			data_o = 'x;
 	end
 
-assign data_o = out_read_data;
 
+true_dual_port_ram_single_clock #(
+	.DATA_WIDTH ( DWIDTH ),
+	.ADDR_WIDTH ( AWIDTH )
+) i_true_dual_port_ram_single_clock (
+	.data_a ( mem_data_a ),
+	.data_b ( mem_data_b ),
+	.addr_a ( mem_ptr_a  ),
+	.addr_b ( mem_ptr_b  ),
+	.we_a   ( mem_wren_a ),
+	.we_b   ( mem_wren_b ),
+	.clk    ( clk_i      ),
+	.q_a    ( mem_q_a    ),
+	.q_b    ( mem_q_b    )
+);
 
-logic [AWIDTH-1:0] mem_ptr_a, mem_ptr_b;
-logic [DWIDTH-1:0] mem_r_data_a, mem_r_data_b,
-                   mem_w_data_a, mem_w_data_b;
-
-logic mem_write_enable_a, mem_write_enable_b;
-
-always_comb
-	begin : data_operations
-		min_read_data = 'x;
-		max_read_data = 'x;
-		out_read_data = 'x;
-		mem_ptr_a     = '0;
-		mem_ptr_b     = '0;
-		mem_w_data_a  = '0;
-		mem_w_data_b  = '0;
-		mem_write_enable_a = 0;
-		mem_write_enable_b = 0;
-
-		if(( state == RECEIVE_S ) && val_i )
-			begin
-				mem_ptr_a = input_write_ptr_new;
-				mem_w_data_a = data_i;
-				mem_write_enable_a = val_i;
-			end
-		// else if( state == SORTING_S )
-		// 	begin
-		// 		// mem_ptr_a = min_read_ptr;
-		// 		// mem_ptr_b = max_read_ptr;
-		// 		// if( ~sorting_data_swap )
-		// 		// 	begin
-		// 		// 		min_read_data = mem_r_data_a;
-		// 		// 		max_read_data = mem_r_data_b;
-		// 		// 	end
-		// 		// else
-		// 		// 	begin
-		// 		// 		// mem_w_data_a = max_write_data;
-		// 		// 		// mem_w_data_b = min_write_data;
-		// 		// 		// mem_write_enable_a = 1'b1;
-		// 		// 		// mem_write_enable_b = 1'b1;
-		// 		// 	end
-		// 	end
-		else if( state == OUTPUT_S )
-			begin
-				mem_ptr_b = out_read_ptr;
-				out_read_data = mem_r_data_b;
-			end
-	end
-
-always_ff @( posedge clk_i )
-	begin : memory_operations
-		mem_r_data_a <= mem[mem_ptr_a];
-		if( mem_write_enable_a )
-			mem[mem_ptr_a] <= mem_w_data_a;
-
-		mem_r_data_b <= mem[mem_ptr_b];
-		if( mem_write_enable_b )
-			mem[mem_ptr_b] <= mem_w_data_b;
-	end
 
 
 always_ff @( posedge clk_i )
 	begin
-		// if( ( state_next == OUTPUT_S ) && ( out_read_ptr == 1'b0 ) )
-		// 	sop_o <= 1'b1;
-		// else
-		// 	sop_o <= 0;
+		if( ( state == OUTPUT_S ) && ( out_read_ptr == 1'b0 ) )
+			sop_o <= 1'b1;
+		else
+			sop_o <= 0;
 
-		if( ( state_next == OUTPUT_S ) && ( out_read_ptr == input_words_count ) )
+		if( ( state == OUTPUT_S ) && ( out_read_ptr == input_words_count ) )
 			eop_o <= 1'b1;
 		else
 			eop_o <= 0;
 
-		// if( ( state_next == OUTPUT_S ) && ( out_read_ptr <= input_words_count ) )
-		// 	val_o <= 1'b1;
-		// else
-		// 	val_o <= 0;
+		if( ( state == OUTPUT_S ) && ( out_read_ptr <= input_words_count ) )
+			val_o <= 1'b1;
+		else
+			val_o <= 0;
 
 		// if( ( state_next == SORTING_S ) || ( state_next == OUTPUT_S ) && ( out_read_ptr <= input_words_count ) )
 		// 	busy_o <= 1'b1;

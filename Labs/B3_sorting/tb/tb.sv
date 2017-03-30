@@ -82,7 +82,7 @@ initial
 
 		repeat (10) @( posedge clk_i );
 
-		repeat (5) @( posedge clk_i );
+		repeat (15) @( posedge clk_i );
 		$stop;
 	end
 
