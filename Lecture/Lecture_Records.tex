@@ -174,4 +174,49 @@ BSDL file
 
 С3 - randomize - ds,hjity в беспатной версии моделсим
 urandom
+
+
+
+fix - channel output not compliant with standard
+
+
+TimeQuest analysis
+
+
+.qip
+.qsf
+.sdc
+.qip ip-cores import file
+
+
+svn :
+
+timequest > create clbock > set targets
+
+derive_pll_clocks - read timequest getting started  -  построение constraints для клока, получаемого с PLL
+derive_clock_uncertain....
+
+
+set_false_path  -  снть ограничение тайминга для сигналов, для которых это некритично
+set_multicycle_path - разрешить обработку данных на следующих тактах
+
+кузщке ешьштп
+
+and some project settings:
+
+more settings > more analysis &syntesis settings
+	remove duplicate registers - под отключение, если используется попуск через регистры для уменьшения fanouut и повышения быстродействия
+	disable register merging across hierarchies =>
+
+fitter settings > more settings
+	auto register duplication - обратно предыдущему, дуплицирует триггеры, если fanut превышает порог
+
+	assignments editor - опции для отдельных модулей
+
+
+
+
+
+
+
 \end{document}
